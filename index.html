@@ -1,0 +1,1198 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teoria da Computação - Peer Instruction</title>
+    <style>
+        :root {
+            --primary: #1a5f7a;
+            --secondary: #e86a33;
+            --bg: #f9f9f9;
+            --text: #333;
+            --light-bg: #fff;
+        }
+        
+        body, html {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            height: 100%;
+            background-color: var(--bg);
+            color: var(--text);
+            overflow: hidden;
+        }
+
+        .slide-container {
+            width: 100vw;
+            height: 100vh;
+            position: relative;
+        }
+
+        .slide {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+            box-sizing: border-box;
+            background-color: var(--light-bg);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .slide.active {
+            opacity: 1;
+            pointer-events: auto;
+            z-index: 1;
+        }
+
+        h1, h2, h3 {
+            color: var(--primary);
+            text-align: center;
+        }
+        
+        h1 { font-size: 3rem; margin-bottom: 0.5em; }
+        h2 { font-size: 2.2rem; margin-bottom: 0.5em; }
+        
+        .time-badge {
+            background-color: var(--secondary);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 1rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+            display: inline-block;
+        }
+
+        .content {
+            font-size: 1.5rem;
+            max-width: 900px;
+            width: 100%;
+            line-height: 1.6;
+        }
+        
+        .conceptest {
+            background: #eef5f9;
+            padding: 2rem;
+            border-radius: 12px;
+            border-left: 6px solid var(--secondary);
+            width: 100%;
+            max-width: 900px;
+        }
+        
+        .options {
+            list-style-type: none;
+            padding: 0;
+            margin-top: 20px;
+        }
+        
+        .options li {
+            background: #fff;
+            margin: 10px 0;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            cursor: pointer;
+            transition: transform 0.2s, background-color 0.2s;
+            border: 2px solid transparent;
+        }
+        
+        .options li:hover {
+            transform: translateX(10px);
+            background-color: #f0f0f0;
+        }
+        
+        .answer-reveal {
+            display: none;
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #d4edda;
+            color: #155724;
+            border-radius: 8px;
+            font-weight: bold;
+        }
+
+        .btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 1.2rem;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: background 0.3s;
+        }
+        
+        .btn:hover {
+            background-color: #124356;
+        }
+
+        .controls {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 100;
+            display: flex;
+            gap: 10px;
+        }
+        
+        .controls button {
+            background: rgba(26, 95, 122, 0.8);
+            color: white;
+            border: none;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            font-size: 1.5rem;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .controls button:hover {
+            background: rgba(26, 95, 122, 1);
+        }
+
+        .progress-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            height: 5px;
+            background-color: var(--secondary);
+            z-index: 101;
+            transition: width 0.3s;
+        }
+
+        .slide-counter {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--primary);
+            z-index: 100;
+            background: rgba(255,255,255,0.8);
+            padding: 5px 10px;
+            border-radius: 8px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            font-size: 1.2rem;
+        }
+        
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        
+        th {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+        .modal-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .modal-content input {
+            padding: 10px;
+            font-size: 1.2rem;
+            margin: 15px 0;
+            width: 80%;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .modal-buttons button {
+            margin: 0 10px;
+        }
+
+    
+        .scoreboard {
+            position: fixed;
+            top: 70px;
+            right: 20px;
+            width: 200px;
+            background: rgba(255,255,255,0.95);
+            border: 2px solid var(--primary);
+            border-radius: 8px;
+            padding: 15px;
+            z-index: 200;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .scoreboard h3 { margin-top: 0; font-size: 1.1rem; text-align: center; color: var(--primary); }
+        .scoreboard-table { width: 100%; font-size: 1rem; margin-top: 10px; border-collapse: collapse; }
+        .scoreboard-table th, .scoreboard-table td { padding: 5px; border-bottom: 1px solid #ddd; text-align: center; color: black; }
+        .stars { color: #d4af37; font-size: 1.2rem; text-align: center; margin: 10px 0; font-weight: bold; text-shadow: 1px 1px 1px #000; }
+</style>
+    <!-- MathJax for rendering LaTeX formulas -->
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+
+    <div id="scoreboard" class="scoreboard">
+        <h3>Seu Histórico</h3>
+        <div class="stars">Estrelas: <span id="starCount">0</span> &#11088;</div>
+        <table class="scoreboard-table">
+            <thead><tr><th>Q</th><th>V1</th><th>V2</th></tr></thead>
+            <tbody id="scoreBody"></tbody>
+        </table>
+    </div>
+
+    
+    </div>
+
+    <div class="slide-counter" id="slideCounter"></div>
+
+    <div class="slide-container" id="slides">
+        
+        <!-- Slide 1 -->
+        <div class="slide active">
+            <h1>Teoria da Computação</h1>
+            <h2>"Teoremas e mais" (Aulas 21, 22, 23)</h2>
+            <div class="content" style="text-align: center;">
+                <p>Abordagem baseada em <em>Peer Instruction</em>. Prepare seu dispositivo para participar das votações interativas!</p>
+            </div>
+        </div>
+
+        <!-- Slide 2 -->
+        <div class="slide">
+            <h2>Regras do Peer Instruction</h2>
+            <div class="time-badge">Abertura: 10 min</div>
+            <div class="content">
+                <ol>
+                    <li><strong>Apresentação:</strong> O professor apresenta o conceito brevemente.</li>
+                    <li><strong>ConcepTest:</strong> Uma questão de múltipla escolha é lançada.</li>
+                    <li><strong>Votação 1 (V1):</strong> Votem INDIVIDUALMENTE e EM SILÊNCIO (1-2 min).</li>
+                    <li><strong>Debate:</strong> Discutam em PARES com quem votou diferente (3 min). Tentem convencer o colega!</li>
+                    <li><strong>Votação 2 (V2):</strong> Revotem baseados no debate.</li>
+                    <li><strong>Resolução:</strong> O professor explica o gabarito e encerra o ciclo.</li>
+                </ol>
+            </div>
+        </div>
+
+        <!-- Slide Cantor Math -->
+        <div class="slide">
+            <h2>A Matemática por trás: Os Infinitos de Cantor</h2>
+            <div class="time-badge">Módulo I: 35 min</div>
+            <div class="content" style="max-width: 1000px; display: flex; flex-direction: column; align-items: center; gap: 20px;">
+                <p style="font-size: 1.2rem; margin:0; text-align: justify;">Em 1891, o matemático Georg Cantor provou algo assustador: <strong>alguns infinitos são maiores que outros</strong>. Ele queria demonstrar que o conjunto dos números reais (\(\mathbb{R}\)) é estritamente maior que o dos inteiros ou naturais (\(\mathbb{N}\)), ou seja, os reais são <em>incontáveis</em>.</p>
+                
+                <div style="background: #fff; padding: 20px; border-radius: 10px; border: 2px dashed var(--primary); display: flex; gap: 20px; align-items: center; width: 100%; font-size: 1.1rem; box-sizing: border-box;">
+                    <div style="flex: 1;">
+                        <strong>A Ideia Genial:</strong>
+                        <ul style="margin-top: 10px; line-height: 1.6;">
+                            <li>Suponha que alguém afirme ter listado todos os reais (ex: entre 0 e 1), um por linha.</li>
+                            <li>Construímos um número <em>totalmente novo</em> extraindo a diagonal principal dessa lista.</li>
+                            <li>Para o 1º dígito decimal do novo número, pegamos o 1º dígito da 1ª linha e mudamos ele.</li>
+                            <li>Para o 2º dígito, mudamos o 2º dígito da 2ª linha. E assim até o infinito.</li>
+                        </ul>
+                    </div>
+                    <div style="flex: 0.8; background: #f0f0f0; padding: 15px; border-radius: 8px; text-align: center; font-family: monospace; font-size: 1.3rem;">
+                        <span style="color: gray;">1.</span> 0.<strong style="color: var(--secondary);">4</strong>135...<br>
+                        <span style="color: gray;">2.</span> 0.9<strong style="color: var(--secondary);">8</strong>72...<br>
+                        <span style="color: gray;">3.</span> 0.12<strong style="color: var(--secondary);">5</strong>9...<br>
+                        ...<br>
+                        <br>
+                        Novo: 0.<span style="color: var(--secondary); font-weight: bold;">596</span>...
+                    </div>
+                </div>
+                
+                <div style="padding: 15px; background: #eef5f9; border-left: 5px solid var(--primary); border-radius: 5px; font-size: 1.1rem; width: 100%; text-align: justify; line-height: 1.4; box-sizing: border-box;">
+                    Como esse novo número difere do 1º número da lista no 1º dígito, do 2º número no 2º dígito, etc., <strong>ele não pode estar na lista!</strong> A lista furou. Logo, é impossível listar todos os reais.<br><br>
+                    <em>Alan Turing e outros usaram exatamente essa mesma prova geométrica para mostrar que existem mais linguagens do que Máquinas de Turing!</em>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide Videos Cantor -->
+        <div class="slide">
+            <h2>Para Aprofundar: O Infinito em Vídeo</h2>
+            <div class="time-badge">Módulo I: 35 min</div>
+            <div class="content" style="max-width: 1200px; display: flex; flex-direction: column; align-items: center; gap: 20px;">
+                <p style="font-size: 1.1rem; margin:0; text-align: center;">Esses vídeos ilustram brilhantemente a genialidade da diagonalização e os diferentes tamanhos do infinito. Ótimos materiais de apoio para entender a dimensão do problema!</p>
+                
+                <div style="display: flex; gap: 20px; justify-content: center; width: 100%; flex-wrap: wrap; margin-top: 10px;">
+                    <!-- Video 1 -->
+                    <div style="flex: 1; min-width: 300px; background: #000; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 8px rgba(0,0,0,0.2); position: relative; cursor: pointer;" onmouseover="this.querySelector('img').style.opacity='0.6'" onmouseout="this.querySelector('img').style.opacity='0.9'">
+                        <a href="https://www.youtube.com/watch?v=Xj5On32iNl0" target="_blank" style="text-decoration: none; color: white;">
+                            <img src="https://img.youtube.com/vi/Xj5On32iNl0/hqdefault.jpg" alt="Video 1" style="width: 100%; height: 200px; object-fit: cover; display: block; opacity: 0.9; transition: opacity 0.3s;">
+                            <div style="position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%); font-size: 4rem; text-shadow: 0 0 10px rgba(0,0,0,0.8); color: rgba(255, 255, 255, 0.9);">▶</div>
+                            <div style="background: var(--primary); padding: 12px; font-weight: bold; text-align: center; font-size: 1.1rem; display: flex; justify-content: center; align-items: center; gap: 10px;">
+                                <svg style="width:24px;height:24px" viewBox="0 0 24 24"><path fill="currentColor" d="M10,15L15.19,12L10,9V15M21.56,7.17C21.69,7.64 21.78,8.27 21.84,9.07C21.91,9.87 21.94,10.84 21.94,12C21.94,13.16 21.91,14.13 21.84,14.93C21.78,15.73 21.69,16.36 21.56,16.83C21.31,17.73 20.73,18.31 19.83,18.56C19.36,18.69 18.5,18.78 17.18,18.84C15.88,18.91 14.16,18.94 12,18.94C9.84,18.94 8.12,18.91 6.82,18.84C5.5,18.78 4.64,18.69 4.17,18.56C3.27,18.31 2.69,17.73 2.44,16.83C2.31,16.36 2.22,15.73 2.16,14.93C2.09,14.13 2.06,13.16 2.06,12C2.06,10.84 2.09,9.87 2.16,9.07C2.22,8.27 2.31,7.64 2.44,7.17C2.69,6.27 3.27,5.69 4.17,5.44C4.64,5.31 5.5,5.22 6.82,5.16C8.12,5.09 9.84,5.06 12,5.06C14.16,5.06 15.88,5.09 17.18,5.16C18.5,5.22 19.36,5.31 19.83,5.44C20.73,5.69 21.31,6.27 21.56,7.17Z" /></svg>
+                                Abrir no YouTube
+                            </div>
+                        </a>
+                    </div>
+                    
+                    <!-- Video 2 -->
+                    <div style="flex: 1; min-width: 300px; background: #000; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 8px rgba(0,0,0,0.2); position: relative; cursor: pointer;" onmouseover="this.querySelector('img').style.opacity='0.6'" onmouseout="this.querySelector('img').style.opacity='0.9'">
+                        <a href="https://www.youtube.com/watch?v=zhTKj5nGwuA" target="_blank" style="text-decoration: none; color: white;">
+                            <img src="https://img.youtube.com/vi/zhTKj5nGwuA/hqdefault.jpg" alt="Video 2" style="width: 100%; height: 200px; object-fit: cover; display: block; opacity: 0.9; transition: opacity 0.3s;">
+                            <div style="position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%); font-size: 4rem; text-shadow: 0 0 10px rgba(0,0,0,0.8); color: rgba(255, 255, 255, 0.9);">▶</div>
+                            <div style="background: var(--primary); padding: 12px; font-weight: bold; text-align: center; font-size: 1.1rem; display: flex; justify-content: center; align-items: center; gap: 10px;">
+                                <svg style="width:24px;height:24px" viewBox="0 0 24 24"><path fill="currentColor" d="M10,15L15.19,12L10,9V15M21.56,7.17C21.69,7.64 21.78,8.27 21.84,9.07C21.91,9.87 21.94,10.84 21.94,12C21.94,13.16 21.91,14.13 21.84,14.93C21.78,15.73 21.69,16.36 21.56,16.83C21.31,17.73 20.73,18.31 19.83,18.56C19.36,18.69 18.5,18.78 17.18,18.84C15.88,18.91 14.16,18.94 12,18.94C9.84,18.94 8.12,18.91 6.82,18.84C5.5,18.78 4.64,18.69 4.17,18.56C3.27,18.31 2.69,17.73 2.44,16.83C2.31,16.36 2.22,15.73 2.16,14.93C2.09,14.13 2.06,13.16 2.06,12C2.06,10.84 2.09,9.87 2.16,9.07C2.22,8.27 2.31,7.64 2.44,7.17C2.69,6.27 3.27,5.69 4.17,5.44C4.64,5.31 5.5,5.22 6.82,5.16C8.12,5.09 9.84,5.06 12,5.06C14.16,5.06 15.88,5.09 17.18,5.16C18.5,5.22 19.36,5.31 19.83,5.44C20.73,5.69 21.31,6.27 21.56,7.17Z" /></svg>
+                                Abrir no YouTube
+                            </div>
+                        </a>
+                    </div>
+                    
+                    <!-- Video 3 -->
+                    <div style="flex: 1; min-width: 300px; background: #000; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 8px rgba(0,0,0,0.2); position: relative; cursor: pointer;" onmouseover="this.querySelector('img').style.opacity='0.6'" onmouseout="this.querySelector('img').style.opacity='0.9'">
+                        <a href="https://www.youtube.com/watch?v=R1pDXguuVIk" target="_blank" style="text-decoration: none; color: white;">
+                            <img src="https://img.youtube.com/vi/R1pDXguuVIk/hqdefault.jpg" alt="Video 3" style="width: 100%; height: 200px; object-fit: cover; display: block; opacity: 0.9; transition: opacity 0.3s;">
+                            <div style="position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%); font-size: 4rem; text-shadow: 0 0 10px rgba(0,0,0,0.8); color: rgba(255, 255, 255, 0.9);">▶</div>
+                            <div style="background: var(--primary); padding: 12px; font-weight: bold; text-align: center; font-size: 1.1rem; display: flex; justify-content: center; align-items: center; gap: 10px;">
+                                <svg style="width:24px;height:24px" viewBox="0 0 24 24"><path fill="currentColor" d="M10,15L15.19,12L10,9V15M21.56,7.17C21.69,7.64 21.78,8.27 21.84,9.07C21.91,9.87 21.94,10.84 21.94,12C21.94,13.16 21.91,14.13 21.84,14.93C21.78,15.73 21.69,16.36 21.56,16.83C21.31,17.73 20.73,18.31 19.83,18.56C19.36,18.69 18.5,18.78 17.18,18.84C15.88,18.91 14.16,18.94 12,18.94C9.84,18.94 8.12,18.91 6.82,18.84C5.5,18.78 4.64,18.69 4.17,18.56C3.27,18.31 2.69,17.73 2.44,16.83C2.31,16.36 2.22,15.73 2.16,14.93C2.09,14.13 2.06,13.16 2.06,12C2.06,10.84 2.09,9.87 2.16,9.07C2.22,8.27 2.31,7.64 2.44,7.17C2.69,6.27 3.27,5.69 4.17,5.44C4.64,5.31 5.5,5.22 6.82,5.16C8.12,5.09 9.84,5.06 12,5.06C14.16,5.06 15.88,5.09 17.18,5.16C18.5,5.22 19.36,5.31 19.83,5.44C20.73,5.69 21.31,6.27 21.56,7.17Z" /></svg>
+                                Abrir no YouTube
+                            </div>
+                        </a>
+                    </div>
+                </div>
+                <div style="margin-top: 20px; padding: 15px; background: #eef5f9; border-left: 5px solid var(--primary); border-radius: 5px; font-size: 1.1rem; text-align: left; width: 100%; box-sizing: border-box;">
+                    <strong>📖 Leitura Recomendada:</strong> Conheça mais sobre a eficácia da metodologia ativa empregada nesta aula no artigo científico: <br>
+                    <a href="https://www.scielo.br/j/paideia/a/Dy6x9FFND3GfGJmyxhSBNXw/?lang=pt" target="_blank" style="color: var(--secondary); text-decoration: none; font-weight: bold; display: inline-block; margin-top: 10px;">
+                        🔗 Acessar Artigo no SciELO (PDF)
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 3 -->
+        <div class="slide">
+            <h2>Módulo I: A Diagonalização de Cantor</h2>
+            <div class="time-badge">Módulo I: 35 min</div>
+            <div class="content" style="max-width: 1000px; display: flex; flex-direction: column; align-items: center; gap: 20px;">
+                <p style="font-size: 1.2rem; margin:0; text-align: justify;"><strong>O Problema:</strong> Sabemos que o conjunto de Máquinas de Turing (\(M_i\)) é contável, mas o conjunto de linguagens é incontável. Portanto, devem existir linguagens que nenhuma MT decide. Vamos construir uma dessas linguagens (\(L_d\)) de forma que ela seja diferente de todas as máquinas!</p>
+                
+                <div style="display: flex; gap: 30px; align-items: flex-start; justify-content: center; width: 100%;">
+                    <style>
+                        .cantor-table td { padding: 10px; transition: all 0.5s ease; border: 1px solid #ccc; }
+                        .cantor-table th { padding: 10px; border: 1px solid #ccc; background: var(--primary); color: white; }
+                    </style>
+                    <table class="cantor-table" style="font-size: 1.2rem; background: white; text-align: center; width: 50%; border-collapse: collapse;">
+                        <tr>
+                            <th></th><th>\(w_1\)</th><th>\(w_2\)</th><th>\(w_3\)</th><th>\(w_4\)</th><th>\(w_5\)</th>
+                        </tr>
+                        <tr><th>\(M_1\)</th><td class="cell" data-r="1" data-c="1">1</td><td class="cell">0</td><td class="cell">1</td><td class="cell">1</td><td class="cell">0</td></tr>
+                        <tr><th>\(M_2\)</th><td class="cell">0</td><td class="cell" data-r="2" data-c="2">0</td><td class="cell">0</td><td class="cell">1</td><td class="cell">1</td></tr>
+                        <tr><th>\(M_3\)</th><td class="cell">1</td><td class="cell">1</td><td class="cell" data-r="3" data-c="3">1</td><td class="cell">0</td><td class="cell">0</td></tr>
+                        <tr><th>\(M_4\)</th><td class="cell">0</td><td class="cell">1</td><td class="cell">1</td><td class="cell" data-r="4" data-c="4">0</td><td class="cell">1</td></tr>
+                        <tr><th>\(M_5\)</th><td class="cell">1</td><td class="cell">0</td><td class="cell">0</td><td class="cell">1</td><td class="cell" data-r="5" data-c="5">1</td></tr>
+                    </table>
+                    
+                    <div style="display: flex; flex-direction: column; gap: 15px; width: 45%;">
+                        <button class="btn" onclick="animateCantor()" id="btnCantor" style="margin-top: 0; background: var(--secondary);">Passo 1: Destacar Diagonal</button>
+                        <div id="ldResult" style="padding: 15px; background: #eef5f9; border-left: 5px solid var(--primary); display: none; font-size: 1.1rem; text-align: left; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+                            <strong>Construindo \(L_d\):</strong><br><br>
+                            Valores da diagonal: <br>
+                            <span id="diagSeq" style="letter-spacing: 5px; font-family: monospace; font-size: 1.3rem;"></span><br><br>
+                            <em>Invertendo (1&rarr;0, 0&rarr;1):</em><br>
+                            <span id="ldSeq" style="color: var(--secondary); font-weight: bold; letter-spacing: 5px; font-family: monospace; font-size: 1.3rem;"></span><br><br>
+                            <small>\(L_d\) difere de \(M_1\) em \(w_1\), de \(M_2\) em \(w_2\)... logo, \(L_d\) <strong>não é</strong> reconhecida por nenhuma MT da lista!</small>
+                        </div>
+                    </div>
+                </div>
+                <div style="margin-top: 15px; padding: 15px; background: #fff3cd; border-left: 5px solid #ffeeba; border-radius: 5px; font-size: 1rem; color: #856404; width: 100%; text-align: justify; line-height: 1.4; box-sizing: border-box;">
+                    <strong>Por que inverter a diagonal?</strong> A diagonalização de Cantor é uma prova por contradição genial. Imagine que você afirme ter listado <em>todas</em> as Máquinas de Turing possíveis. Ao extrairmos a diagonal, pegamos o comportamento de cada máquina \(i\) processando sua própria palavra \(i\). Ao <strong>invertermos</strong> esses resultados, criamos propositalmente uma nova linguagem \(L_d\) que é, por definição, diferente da Máquina 1 (na palavra 1), diferente da Máquina 2 (na palavra 2), e assim até o infinito. Como ela diverge de <em>todas</em> as máquinas da sua lista infinita em pelo menos um ponto, provamos que \(L_d\) não pode ser decidida por nenhuma delas! Logo, há muito mais problemas matemáticos no universo do que programas (Máquinas de Turing) capazes de resolvê-los.
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 4 -->
+        <div class="slide">
+            <h2>ConcepTest 1</h2>
+            <div class="conceptest" data-q="1">
+                <p>Suponha o alfabeto \(\Sigma = \{0, 1\}\). Qual das seguintes afirmações sobre os conjuntos envolvidos na Teoria da Computação é correta?</p>
+                <ul class="options">
+                    <li onclick="selectOption(this)">A) O conjunto de todos os programas válidos que podem ser escritos na linguagem Python, independentemente do seu tamanho, é considerado estritamente incontável.</li>
+                    <li onclick="selectOption(this, true)">B) Existe uma bijeção entre o conjunto dos inteiros (\(\mathbb{Z}\)) e o conjunto de todas as Máquinas de Turing possíveis.</li>
+                    <li onclick="selectOption(this)">C) Todas as linguagens no alfabeto \(\Sigma\) são computavelmente enumeráveis.</li>
+                    <li onclick="selectOption(this)">D) A diagonalização de Cantor demonstra que \([0,1] \subset \mathbb{R}\) tem o mesmo tamanho de \(\mathbb{N}\).</li>
+                </ul>
+                <div class="answer-reveal">
+                    Gabarito: B. Ambos são conjuntos infinitos contáveis (\(\aleph_0\)), sendo possível numerar todas as MTs validamente construídas.
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 5 -->
+        <div class="slide">
+            <h2>ConcepTest 2</h2>
+            <div class="conceptest" data-q="2">
+                <p>Na matriz infinita onde cada linha é uma Máquina \(M_i\) e cada coluna uma palavra \(w_j\), o método da diagonalização constrói \(L_d\) tal que \(w_i \in L_d \iff M_i\) não aceita \(w_i\). O que prova o facto de \(L_d\) diferir de cada linha \(i\) em pelo menos um elemento?</p>
+                <ul class="options">
+                    <li onclick="selectOption(this)">A) \(L_d\) é uma linguagem finita.</li>
+                    <li onclick="selectOption(this, true)">B) Nenhuma Máquina de Turing \(M_i\) pode reconhecer/decidir \(L_d\).</li>
+                    <li onclick="selectOption(this)">C) Embora pareça paradoxal, a linguagem \(L_d\) pode ser formalmente decidida por uma Máquina de Turing Universal desde que a simulação ocorra sem limite de tempo e memória em sua fita infinita.</li>
+                    <li onclick="selectOption(this)">D) \(L_d\) pode ser decidida se expandirmos o alfabeto.</li>
+                </ul>
+                <div class="answer-reveal">
+                    Gabarito: B. A linguagem \(L_d\) difere de cada MT conhecida em pelo menos um caso, portanto nenhuma MT da lista (que contém todas as MTs) reconhece \(L_d\).
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 6 -->
+        <div class="slide">
+            <h2>Módulo II: Redutibilidade Mapeada (\(A \le_m B\))</h2>
+            <div class="time-badge">Módulo II: 50 min</div>
+            <div class="content" style="max-width: 1000px; display: flex; flex-direction: column; align-items: center; gap: 15px;">
+                <div style="background: #fff3cd; padding: 15px; border-radius: 8px; border-left: 5px solid #ffeeba; text-align: justify; font-size: 1.1rem; width: 100%; color: #856404; line-height: 1.5; box-shadow: 0 2px 4px rgba(0,0,0,0.05); margin-bottom: 5px; box-sizing: border-box;">
+                    <strong>O que significa reduzir \(A\) para \(B\)?</strong> Na computação, reduzir significa converter as instâncias (perguntas) de um problema nas instâncias de outro. Dizemos que <strong>\(A \le_m B\)</strong> (\(A\) reduz-se mapeadamente a \(B\)) se existe uma função 100% computável \(f\) tal que, para qualquer palavra \(w\):<br>
+                    <div style="text-align: center; margin: 10px 0; font-size: 1.3rem; font-weight: bold; color: var(--primary);">
+                        \(w \in A \iff f(w) \in B\)
+                    </div>
+                    A grande sacada é: <em>"Se eu descobrir um algoritmo para resolver \(B\), eu posso usar \(f\) como um tradutor prévio e resolver \(A\) de carona!"</em><br><br>
+                    <strong>A Lógica da Indecidibilidade:</strong> Se já temos certeza que \(A\) é <em>indecidível</em> (como o Problema da Parada), e conseguimos construir essa ponte \(f\) para \(B\), a conclusão matemática é fatal: <strong>\(B\) também tem que ser indecidível!</strong> Se \(B\) fosse fácil/decidível, o problema \(A\) seria resolvido junto, gerando um paradoxo.
+                </div>
+                
+                <div style="background: #eef5f9; padding: 20px; border-radius: 10px; width: 100%; border-left: 5px solid var(--secondary); display: flex; flex-direction: column; align-items: center; gap: 15px;">
+                    <div style="display: flex; gap: 20px; align-items: center; width: 100%; justify-content: center;">
+                        <div style="border: 2px dashed #999; padding: 15px; border-radius: 8px; text-align: center; background: white;">
+                            <strong>Instância de \(A\) (\(A_{TM}\))</strong><br>
+                            Máquina \(M\) e Palavra \(w\)
+                        </div>
+                        <div style="font-size: 2rem; color: var(--primary);">➔</div>
+                        <div style="background: var(--primary); color: white; padding: 15px 30px; border-radius: 8px; font-weight: bold; cursor: pointer; transition: transform 0.2s;" onclick="animateReduction()" id="btnReducao">
+                            Função de Redução \(f\) <br><small>(Clique para aplicar)</small>
+                        </div>
+                        <div style="font-size: 2rem; color: var(--primary);">➔</div>
+                        <div id="boxB" style="border: 2px dashed #999; padding: 15px; border-radius: 8px; text-align: center; opacity: 0.3; transition: all 0.5s; background: white;">
+                            <strong>Instância de \(B\) (Ex: \(HALT_{TM}\))</strong><br>
+                            Nova Máquina \(M'\)
+                        </div>
+                    </div>
+                    <div id="redResult" style="display: none; background: #fff; padding: 15px; border-radius: 8px; font-size: 1.1rem; width: 90%; text-align: center; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                        <strong>Sucesso!</strong> A função \(f\) criou \(M'\). <br>
+                        Regra: \(\langle M, w \rangle \in A \iff \langle M' \rangle \in B\).<br>
+                        <em>Como \(A\) (Problema de Aceitação) é indecidível, e conseguimos mapeá-lo perfeitamente para \(B\), concluímos formalmente que \(B\) (Problema da Parada) também é indecidível!</em>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+<!-- Slide 7 -->
+        <div class="slide">
+            <h2>ConcepTest 3</h2>
+            <div class="conceptest" data-q="3">
+                <p>Sabemos que o problema \(A\) é indecidível e construímos uma redução mapeada tal que \(A \le_m B\). O que podemos afirmar rigorosamente sobre \(B\)?</p>
+                <ul class="options">
+                    <li onclick="selectOption(this)">A) Nada se pode afirmar sobre \(B\).</li>
+                    <li onclick="selectOption(this)">B) \(B\) é obrigatoriamente decidível.</li>
+                    <li onclick="selectOption(this, true)">C) \(B\) é obrigatoriamente indecidível.</li>
+                    <li onclick="selectOption(this)">D) \(B\) é caracterizado estritamente como um conjunto que é computavelmente enumerável, mas que definitivamente nunca poderá ser classificado como um problema decidível por nenhuma máquina.</li>
+                </ul>
+                
+                <div class="answer-reveal">
+                    Gabarito: C. A indecidibilidade transfere-se na direção da redução. Se A é impossível de resolver e posso mapeá-lo para B, B também deve ser impossível.
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 8 -->
+        <div class="slide">
+            <h2>ConcepTest 4</h2>
+            <div class="conceptest" data-q="4">
+                <p>Um estudante quer provar que um novo problema \(X\) é indecidível. Sabendo que o Problema da Parada (\(A_{TM}\)) é indecidível, qual redução o estudante DEVE construir?</p>
+                <ul class="options">
+                    <li onclick="selectOption(this)">A) \(X \le_m A_{TM}\)</li>
+                    <li onclick="selectOption(this, true)">B) \(A_{TM} \le_m X\)</li>
+                    <li onclick="selectOption(this)">C) \(X \le_m \emptyset\)</li>
+                    <li onclick="selectOption(this)">D) Na verdade, ambas as abordagens de redução A e B são plenamente válidas e suficientes para provar formalmente a indecidibilidade, dependendo apenas da escolha metodológica do estudante.</li>
+                </ul>
+                
+                <div class="answer-reveal">
+                    Gabarito: B. Devemos reduzir o problema já CONHECIDO como difícil (\(A_{TM}\)) para o problema NOVO (\(X\)). Assim provamos que X é pelo menos tão difícil quanto \(A_{TM}\).
+                </div>
+            </div>
+        </div>
+        
+                <!-- Slide Rice Theory -->
+        <div class="slide">
+            <h2>A Teoria: Entendendo o Teorema de Rice</h2>
+            <div class="time-badge">Módulo III: 40 min</div>
+            <div class="content" style="max-width: 1100px; display: flex; flex-direction: column; align-items: center; gap: 15px;">
+                <p style="font-size: 1.2rem; margin:0; text-align: justify;">Em 1953, Henry Gordon Rice provou um resultado devastador para a Ciência da Computação: de modo geral, é impossível escrever um programa genérico que analise o que <em>outro</em> programa faz de forma comportamental. Isso é uma generalização do Problema da Parada.</p>
+                
+                <div style="display: flex; gap: 20px; width: 100%; margin-top: 10px;">
+                    <div style="flex: 1; background: #eef5f9; padding: 20px; border-radius: 8px; border-top: 5px solid #28a745; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                        <h3 style="color: #28a745; margin-top: 0; text-align: center;">Propriedade Sintática</h3>
+                        <p style="font-size: 1rem; text-align: justify;">Refere-se ao <strong>código fonte</strong> ou estrutura da máquina. Olhamos apenas como ela foi escrita, sem rodá-la.</p>
+                        <ul style="font-size: 1rem; padding-left: 20px;">
+                            <li>O código tem mais de 50 linhas?</li>
+                            <li>A MT possui 5 estados?</li>
+                            <li>Existe algum loop na estrutura do código?</li>
+                        </ul>
+                        <div style="font-weight: bold; text-align: center; color: #155724; margin-top: 15px;">✅ 100% DECIDÍVEL</div>
+                    </div>
+
+                    <div style="flex: 1; background: #fff5f5; padding: 20px; border-radius: 8px; border-top: 5px solid #dc3545; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                        <h3 style="color: #dc3545; margin-top: 0; text-align: center;">Propriedade Semântica</h3>
+                        <p style="font-size: 1rem; text-align: justify;">Refere-se ao <strong>comportamento</strong> do programa (a linguagem que ele aceita ou o que ele faz quando roda).</p>
+                        <ul style="font-size: 1rem; padding-left: 20px;">
+                            <li>O programa vai parar em algum momento?</li>
+                            <li>Ele aceita a string '101'?</li>
+                            <li>Ele é um software malicioso (vírus)?</li>
+                        </ul>
+                        <div style="font-weight: bold; text-align: center; color: #721c24; margin-top: 15px;">❌ INDECIDÍVEL (se não trivial)</div>
+                    </div>
+                </div>
+
+                <div style="margin-top: 10px; padding: 15px; background: #fff3cd; border-left: 5px solid #ffeeba; border-radius: 5px; font-size: 1.1rem; color: #856404; width: 100%; text-align: justify; line-height: 1.4; box-sizing: border-box;">
+                    <strong>O Enunciado:</strong> Toda propriedade semântica <em>não trivial</em> das linguagens Turing-reconhecíveis é indecidível. (Não trivial = é verdade para algumas máquinas, mas falsa para outras). É por isso que é impossível criar um antivírus perfeito ou um analisador de bugs genérico que nunca falhe!
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide Videos Rice -->
+        <div class="slide">
+            <h2>Para Aprofundar: Teorema de Rice em Vídeo</h2>
+            <div class="time-badge">Módulo III: 40 min</div>
+            <div class="content" style="max-width: 1200px; display: flex; flex-direction: column; align-items: center; gap: 20px;">
+                <p style="font-size: 1.1rem; margin:0; text-align: center;">A impossibilidade de analisar o comportamento de algoritmos com outros algoritmos (como antivírus) explicada visualmente. Excelentes materiais complementares!</p>
+                
+                <div style="display: flex; gap: 20px; justify-content: center; width: 100%; flex-wrap: wrap; margin-top: 10px;">
+                    <!-- Video 1 -->
+                    <div style="flex: 1; min-width: 300px; max-width: 450px; background: #000; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 8px rgba(0,0,0,0.2); position: relative; cursor: pointer;" onmouseover="this.querySelector('img').style.opacity='0.6'" onmouseout="this.querySelector('img').style.opacity='0.9'">
+                        <a href="https://www.youtube.com/watch?v=xHFNii9wAaU" target="_blank" style="text-decoration: none; color: white;">
+                            <img src="https://img.youtube.com/vi/xHFNii9wAaU/hqdefault.jpg" alt="Video 1 Rice" style="width: 100%; height: 250px; object-fit: cover; display: block; opacity: 0.9; transition: opacity 0.3s;">
+                            <div style="position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%); font-size: 4rem; text-shadow: 0 0 10px rgba(0,0,0,0.8); color: rgba(255, 255, 255, 0.9);">▶</div>
+                            <div style="background: var(--primary); padding: 12px; font-weight: bold; text-align: center; font-size: 1.1rem; display: flex; justify-content: center; align-items: center; gap: 10px;">
+                                <svg style="width:24px;height:24px" viewBox="0 0 24 24"><path fill="currentColor" d="M10,15L15.19,12L10,9V15M21.56,7.17C21.69,7.64 21.78,8.27 21.84,9.07C21.91,9.87 21.94,10.84 21.94,12C21.94,13.16 21.91,14.13 21.84,14.93C21.78,15.73 21.69,16.36 21.56,16.83C21.31,17.73 20.73,18.31 19.83,18.56C19.36,18.69 18.5,18.78 17.18,18.84C15.88,18.91 14.16,18.94 12,18.94C9.84,18.94 8.12,18.91 6.82,18.84C5.5,18.78 4.64,18.69 4.17,18.56C3.27,18.31 2.69,17.73 2.44,16.83C2.31,16.36 2.22,15.73 2.16,14.93C2.09,14.13 2.06,13.16 2.06,12C2.06,10.84 2.09,9.87 2.16,9.07C2.22,8.27 2.31,7.64 2.44,7.17C2.69,6.27 3.27,5.69 4.17,5.44C4.64,5.31 5.5,5.22 6.82,5.16C8.12,5.09 9.84,5.06 12,5.06C14.16,5.06 15.88,5.09 17.18,5.16C18.5,5.22 19.36,5.31 19.83,5.44C20.73,5.69 21.31,6.27 21.56,7.17Z" /></svg>
+                                Abrir no YouTube
+                            </div>
+                        </a>
+                    </div>
+                    
+                    <!-- Video 2 -->
+                    <div style="flex: 1; min-width: 300px; max-width: 450px; background: #000; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 8px rgba(0,0,0,0.2); position: relative; cursor: pointer;" onmouseover="this.querySelector('img').style.opacity='0.6'" onmouseout="this.querySelector('img').style.opacity='0.9'">
+                        <a href="https://www.youtube.com/watch?v=OcxRkdA6zCs" target="_blank" style="text-decoration: none; color: white;">
+                            <img src="https://img.youtube.com/vi/OcxRkdA6zCs/hqdefault.jpg" alt="Video 2 Rice" style="width: 100%; height: 250px; object-fit: cover; display: block; opacity: 0.9; transition: opacity 0.3s;">
+                            <div style="position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%); font-size: 4rem; text-shadow: 0 0 10px rgba(0,0,0,0.8); color: rgba(255, 255, 255, 0.9);">▶</div>
+                            <div style="background: var(--primary); padding: 12px; font-weight: bold; text-align: center; font-size: 1.1rem; display: flex; justify-content: center; align-items: center; gap: 10px;">
+                                <svg style="width:24px;height:24px" viewBox="0 0 24 24"><path fill="currentColor" d="M10,15L15.19,12L10,9V15M21.56,7.17C21.69,7.64 21.78,8.27 21.84,9.07C21.91,9.87 21.94,10.84 21.94,12C21.94,13.16 21.91,14.13 21.84,14.93C21.78,15.73 21.69,16.36 21.56,16.83C21.31,17.73 20.73,18.31 19.83,18.56C19.36,18.69 18.5,18.78 17.18,18.84C15.88,18.91 14.16,18.94 12,18.94C9.84,18.94 8.12,18.91 6.82,18.84C5.5,18.78 4.64,18.69 4.17,18.56C3.27,18.31 2.69,17.73 2.44,16.83C2.31,16.36 2.22,15.73 2.16,14.93C2.09,14.13 2.06,13.16 2.06,12C2.06,10.84 2.09,9.87 2.16,9.07C2.22,8.27 2.31,7.64 2.44,7.17C2.69,6.27 3.27,5.69 4.17,5.44C4.64,5.31 5.5,5.22 6.82,5.16C8.12,5.09 9.84,5.06 12,5.06C14.16,5.06 15.88,5.09 17.18,5.16C18.5,5.22 19.36,5.31 19.83,5.44C20.73,5.69 21.31,6.27 21.56,7.17Z" /></svg>
+                                Abrir no YouTube
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+<!-- Slide 9 -->
+        <div class="slide">
+            <h2>Sessão 2: Módulo III - Teorema de Rice</h2>
+            <div class="time-badge">Módulo III: 40 min</div>
+            <div class="content" style="max-width: 1000px; display: flex; flex-direction: column; align-items: center; gap: 15px;">
+                <p style="font-size: 1.2rem; margin:0; text-align: justify;"><strong>O Teorema:</strong> Qualquer propriedade <em>semântica</em> não trivial de linguagens reconhecidas por MTs é indecidível. Já propriedades <em>sintáticas</em> são decidíveis por mera inspeção de código estrutural.</p>
+                
+                <div style="display: flex; gap: 20px; width: 100%; margin-top: 10px;">
+                    <div style="flex: 1; background: #f0f0f0; border-radius: 10px; padding: 20px; display: flex; flex-direction: column; align-items: center; gap: 15px;">
+                        <h3 style="margin:0;">Inspetor de Máquina \(M\)</h3>
+                        <div style="font-size: 4rem;">🤖</div>
+                        <div style="display: flex; gap: 10px; flex-direction: column; width: 100%;">
+                            <button class="btn" style="background: #28a745; font-size: 1rem; width: 100%; margin-top:0;" onclick="inspectRice('sintatico')">Analisar Sintaxe (Código)</button>
+                            <button class="btn" style="background: #dc3545; font-size: 1rem; width: 100%; margin-top:0;" onclick="inspectRice('semantico')">Analisar Semântica (Comportamento)</button>
+                        </div>
+                    </div>
+                    <div id="riceResult" style="flex: 1; display: flex; align-items: center; justify-content: center; background: white; border: 2px dashed #ccc; border-radius: 10px; padding: 20px; font-size: 1.2rem; text-align: center; transition: all 0.3s;">
+                        <em>Selecione um tipo de análise para inspecionar a máquina...</em>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 10 -->
+        <div class="slide">
+            <h2>ConcepTest 5</h2>
+            <div class="conceptest" data-q="5">
+                <p>Qual dos seguintes problemas sobre uma Máquina de Turing \(M\) é <strong>DECIDÍVEL</strong> (onde o Teorema de Rice NÃO se aplica)?</p>
+                <ul class="options">
+                    <li onclick="selectOption(this)">A) Saber se \(L(M) = \emptyset\).</li>
+                    <li onclick="selectOption(this)">B) Saber se \(L(M)\) contém a palavra "computacao".</li>
+                    <li onclick="selectOption(this, true)">C) Saber se o número de estados da Máquina \(M\) é superior a 100.</li>
+                    <li onclick="selectOption(this)">D) Saber se \(L(M)\) pode ser perfeitamente descrita por uma linguagem regular ou, equivalentemente, se pode ser reconhecida por um autômato finito determinístico com um número finito de estados.</li>
+                </ul>
+                
+                <div class="answer-reveal">
+                    Gabarito: C. Contar o número de estados é uma inspeção sintática direta do código/grafo da máquina e não avalia o comportamento da linguagem, logo é decidível.
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 11 -->
+        <div class="slide">
+            <h2>ConcepTest 6</h2>
+            <div class="conceptest" data-q="6">
+                <p>Considere a propriedade \(P\): "A Máquina \(M\) aceita a palavra '101' em menos de 50 passos". Esta propriedade é indecidível pelo Teorema de Rice?</p>
+                <ul class="options">
+                    <li onclick="selectOption(this)">A) Sim, porque se refere ao comportamento da máquina.</li>
+                    <li onclick="selectOption(this, true)">B) Não, porque não é uma propriedade da linguagem \(L(M)\) e pode ser simulada e decidida em tempo finito.</li>
+                    <li onclick="selectOption(this)">C) Sim, de acordo com o Teorema de Rice, isso é indecidível, porque qualquer afirmação que envolva a aceitação ou rejeição de cadeias específicas por uma máquina é intrinsecamente uma propriedade semântica não-trivial.</li>
+                    <li onclick="selectOption(this)">D) Não, porque todas as propriedades de linguagens são decidíveis.</li>
+                </ul>
+                
+                <div class="answer-reveal">
+                    Gabarito: B. Uma limitação de passos (50 passos) permite simular a máquina com garantia de que o simulador vai parar e nos dar uma resposta (sim ou não), tornando o problema decidível.
+                </div>
+            </div>
+        </div>
+
+                <!-- Slide LLM Question -->
+        <div class="slide">
+            <h2>A Grande Questão Moderna</h2>
+            <div class="time-badge">Reflexão</div>
+            <div class="content" style="max-width: 1000px; display: flex; flex-direction: column; align-items: center; gap: 30px; margin-top: 20px;">
+                
+                <div style="background: #fff; border: 4px solid var(--secondary); padding: 30px; border-radius: 15px; box-shadow: 0 10px 20px rgba(0,0,0,0.15); width: 100%; box-sizing: border-box; text-align: center; transform: scale(1.05);">
+                    <h3 style="color: var(--secondary); font-size: 1.5rem; margin-top: 0; text-transform: uppercase; letter-spacing: 2px;">Pergunta Avassaladora</h3>
+                    <p style="font-size: 2rem; font-weight: bold; margin: 20px 0; line-height: 1.3; color: var(--text);">"Será mesmo que agora, com IAs gigantes e LLMs (ChatGPT, Claude, Gemini), não conseguimos finalmente verificar a propriedade semântica de um código genérico?"</p>
+                </div>
+
+                <div style="background: #eef5f9; padding: 25px; border-radius: 10px; border-left: 8px solid var(--primary); width: 100%; text-align: left; font-size: 1.2rem; line-height: 1.6; box-sizing: border-box;">
+                    <p style="margin-top: 0;">A resposta matemática e implacável de Rice continua sendo: <strong>NÃO.</strong></p>
+                    <p>Por mais incrivelmente inteligentes que as IAs pareçam, no fundo, elas rodam em computadores clássicos — ou seja, são <strong>Máquinas de Turing</strong> disfarçadas de bilhões de matrizes e parâmetros.</p>
+                    <p>O Teorema de Rice prova matematicamente que <em>nenhum</em> algoritmo pode prever o comportamento semântico de outro algoritmo genérico com 100% de certeza. Um LLM pode usar heurísticas fantásticas para acertar 99% dos casos do dia a dia, mas diante de paradoxos e loops obscuros, a IA inevitavelmente vai travar, errar ou <em>alucinar</em>.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide LLM 1 -->
+        <div class="slide">
+            <h2>1. A Formalização do Conflito</h2>
+            <div class="time-badge">Módulo III: Teoria Moderna</div>
+            <div class="content" style="max-width: 1100px; display: flex; flex-direction: column; align-items: center; gap: 20px;">
+                <p style="font-size: 1.2rem; text-align: justify; margin-bottom: 0;">O Teorema de Rice afirma que se \(\mathcal{R}\) é a classe de todas as funções parciais computáveis e \(S\) é um subconjunto não trivial de \(\mathcal{R}\) (\(S \neq \emptyset\) e \(S \neq \mathcal{R}\)), então a seguinte linguagem é indecidível:</p>
+                
+                <div style="background: #eef5f9; padding: 15px 30px; border-left: 5px solid var(--primary); font-size: 1.4rem; font-weight: bold; font-family: monospace;">
+                    \(L_{S} = \{\langle M \rangle \mid M \text{ é uma MT e } L(M) \in S\}\)
+                </div>
+                
+                <div style="background: #fff5f5; padding: 20px; border-radius: 8px; border-left: 5px solid #dc3545; box-shadow: 0 4px 6px rgba(0,0,0,0.1); font-size: 1.15rem; text-align: justify; line-height: 1.6;">
+                    Se tentarmos usar um <strong>LLM como um decididor</strong> para \(L_{S}\) (por exemplo, injetando a descrição de uma Máquina \(\langle M \rangle\) no prompt e esperando que ele responda "Sim" ou "Não" sobre uma propriedade semântica), a teoria prevê categoricamente:<br><br>
+                    <strong>Nenhum LLM pode ser um decididor perfeito.</strong> Como o LLM roda em tempo finito e espaço finito, ele próprio é uma Máquina de Turing que sempre para (um decididor). Portanto, por contradição matemática, ele não pode computar a função característica de \(L_{S}\).
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide LLM 2 -->
+        <div class="slide">
+            <h2>2. O LLM como um Reconhecedor</h2>
+            <div class="time-badge">Módulo III: Teoria Moderna</div>
+            <div class="content" style="max-width: 1100px; display: flex; flex-direction: column; align-items: center; gap: 20px;">
+                <p style="font-size: 1.3rem; text-align: justify; font-weight: bold; color: var(--primary);">Se o LLM não pode ser um decididor, ele poderia ser pelo menos um reconhecedor (gerar respostas corretas para o "Sim", mas entrar em loop ou falhar para o "Não")?</p>
+                
+                <ul style="font-size: 1.2rem; text-align: justify; line-height: 1.8; background: #fff; padding: 30px 40px; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); width: 100%; box-sizing: border-box;">
+                    <li style="margin-bottom: 15px;">Na prática, LLMs possuem um <strong>teto rígido de tempo de computação por token</strong> (determinado pelo número de camadas da arquitetura Transformer). Ele <em>não tem</em> a capacidade de simular infinitamente uma Máquina de Turing arbitrária.</li>
+                    <li>Portanto, teoricamente, o LLM falha tanto na decidibilidade quanto na <em>Turing-reconhecibilidade</em> de propriedades semânticas gerais de códigos arbitrários. Ele opera estritamente dentro da classe de <strong>linguagens decidíveis por recursos limitados</strong>.</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Slide LLM 3 -->
+        <div class="slide">
+            <h2>3. Redução Semântica vs. Sintática</h2>
+            <div class="time-badge">Módulo III: Teoria Moderna</div>
+            <div class="content" style="max-width: 1100px; display: flex; flex-direction: column; align-items: center; gap: 20px;">
+                <p style="font-size: 1.2rem; text-align: justify;">O Teorema de Rice foca na <strong>semântica</strong> (o comportamento da função, não o texto). Se dois códigos diferentes realizam exatamente a mesma função, o Teorema de Rice exige que o verificador dê a mesma resposta para ambos.</p>
+                
+                <div style="background: #fff3cd; padding: 25px; border-radius: 8px; border-left: 5px solid #ffeeba; text-align: justify; font-size: 1.15rem; color: #856404; width: 100%; box-sizing: border-box; line-height: 1.6;">
+                    <strong>É aqui que a Teoria explica o comportamento da IA:</strong><br><br>
+                    <ul style="margin: 0; padding-left: 25px;">
+                        <li style="margin-bottom: 10px;">O LLM avalia a <em>sintaxe</em> (a forma textual, nomes de variáveis, padrões) para <strong>aproximar</strong> a semântica.</li>
+                        <li style="margin-bottom: 10px;"><strong>A Falha Teórica:</strong> É trivial quebrar o LLM alterando a estrutura sintática sem alterar a semântica (ofuscação extrema, loops bizarros equivalentes).</li>
+                        <li>Como o LLM depende de distribuições probabilísticas de tokens sintáticos, ele <strong>falha em reconhecer a equivalência funcional</strong> de códigos altamente ofuscados — algo que o Teorema de Rice já prevê como impossível de se fazer genericamente.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide LLM 4 -->
+        <div class="slide">
+            <h2>4. LLMs com Ferramentas (UTMs)</h2>
+            <div class="time-badge">Módulo III: Teoria Moderna</div>
+            <div class="content" style="max-width: 1100px; display: flex; flex-direction: column; align-items: center; gap: 20px;">
+                <p style="font-size: 1.2rem; text-align: justify;">Recentemente, os LLMs ganharam a capacidade de usar interpretadores de código (rodar scripts em tempo real). Teoricamente, <strong>isso muda a classe de complexidade do sistema</strong>:</p>
+                
+                <div style="display: flex; gap: 20px; width: 100%;">
+                    <div style="flex: 1; background: #fff; border: 2px dashed #999; padding: 20px; border-radius: 10px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+                        <h3 style="color: var(--primary); margin-top: 0;">LLM Isolado</h3>
+                        <p style="font-size: 1.1rem; margin-bottom: 0;">É um autômato limitado, sem capacidade de simulação infinita.</p>
+                    </div>
+                    <div style="flex: 1; background: #eef5f9; border: 2px solid var(--secondary); padding: 20px; border-radius: 10px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                        <h3 style="color: var(--secondary); margin-top: 0;">LLM + Interpretador</h3>
+                        <p style="font-size: 1.1rem; margin-bottom: 0;">Torna-se equivalente a uma <strong>Máquina de Turing Universal</strong>.</p>
+                    </div>
+                </div>
+
+                <div style="background: #f8d7da; padding: 20px; border-radius: 8px; border-left: 5px solid #dc3545; text-align: justify; font-size: 1.15rem; color: #721c24; width: 100%; box-sizing: border-box; line-height: 1.6; margin-top: 5px;">
+                    <strong>A Maldição de Rice:</strong> Ao subir de nível na Hierarquia de Chomsky, o sistema híbrido ganha o poder de simular programas, mas herda imediatamente o fardo de Rice de forma crua. <strong>Ele agora pode entrar em loops infinitos reais</strong> tentando analisar o comportamento de outros códigos.
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide PCP Theory 1 -->
+        <div class="slide">
+            <h2>A Teoria: Problema da Correspondência de Post (PCP)</h2>
+            <div class="time-badge">Módulo IV: 40 min</div>
+            <div class="content" style="max-width: 1000px; display: flex; flex-direction: column; align-items: center; gap: 20px;">
+                <p style="font-size: 1.2rem; text-align: justify; margin: 0;">Em 1946, Emil Post propôs um problema matemático que parece um simples quebra-cabeça infantil, mas que carrega o mesmo peso de indecidibilidade do Problema da Parada. <strong>O mais chocante: ele não usa Máquinas de Turing!</strong></p>
+                
+                <div style="background: #fff; padding: 25px; border-radius: 10px; border: 2px solid var(--primary); display: flex; flex-direction: column; align-items: center; width: 100%; box-sizing: border-box; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                    <h3 style="color: var(--primary); margin-top: 0;">O Quebra-Cabeça (O Dominó de Post)</h3>
+                    <p style="font-size: 1.1rem; text-align: justify; margin-bottom: 20px;">Você recebe um conjunto finito de tipos de peças de dominó. Cada peça tem uma palavra em cima e uma embaixo. A sua missão é <strong>enfileirar as peças (podendo repeti-las)</strong> de forma que a palavra formada no topo seja idêntica à palavra formada na base.</p>
+                    
+                    <div style="display: flex; gap: 15px; align-items: center; justify-content: center; background: #eef5f9; padding: 15px; border-radius: 8px; width: 80%;">
+                        <div style="text-align: center;"><strong>Instância (Peças):</strong></div>
+                        <div style="background: white; border: 2px solid #555; padding: 5px 15px; text-align: center; border-radius: 4px; font-family: monospace; font-size: 1.2rem;">b<hr style="margin: 3px 0; border-top: 2px solid #555;">ca</div>
+                        <div style="background: white; border: 2px solid #555; padding: 5px 15px; text-align: center; border-radius: 4px; font-family: monospace; font-size: 1.2rem;">a<hr style="margin: 3px 0; border-top: 2px solid #555;">ab</div>
+                        <div style="background: white; border: 2px solid #555; padding: 5px 15px; text-align: center; border-radius: 4px; font-family: monospace; font-size: 1.2rem;">ca<hr style="margin: 3px 0; border-top: 2px solid #555;">a</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide PCP Theory 2 -->
+        <div class="slide">
+            <h2>Por que o PCP é Tão Importante?</h2>
+            <div class="time-badge">Módulo IV: 40 min</div>
+            <div class="content" style="max-width: 1000px; display: flex; flex-direction: column; align-items: center; gap: 20px;">
+                
+                <div style="display: flex; gap: 20px; width: 100%;">
+                    <div style="flex: 1; background: #fff3cd; padding: 20px; border-radius: 8px; border-left: 5px solid #ffeeba; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+                        <h3 style="color: #856404; margin-top: 0;">A Ponte da Indecidibilidade</h3>
+                        <p style="font-size: 1.1rem; text-align: justify; line-height: 1.5;">Provar que certos problemas práticos são indecidíveis usando diretamente o Problema da Parada é muito complexo (porque MTs têm estados, fitas, cabeçotes). O PCP é usado como <strong>uma ponte mais simples</strong>. Matematicamente, a prova da indecidibilidade é construída pela redução:</p>
+                        <div style="text-align: center; font-size: 1.5rem; margin: 15px 0; color: var(--primary); font-weight: bold;">
+                            \[ A_{TM} \le_m PCP \]
+                        </div>
+                        <p style="font-size: 1.1rem; text-align: justify; line-height: 1.5;">Ou seja, mostramos que se houvesse solução geral para o PCP, haveria solução para o Problema da Parada. Como não há, o PCP é indecidível.</p>
+                    </div>
+
+                    <div style="flex: 1; background: #eef5f9; padding: 20px; border-radius: 8px; border-left: 5px solid var(--secondary); box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+                        <h3 style="color: var(--secondary); margin-top: 0;">Aplicações Reais</h3>
+                        <p style="font-size: 1.1rem; text-align: justify; line-height: 1.5;">O PCP é o alicerce para provar que muitos problemas de <strong>Linguagens Livres de Contexto (Gramáticas)</strong> são indecidíveis. Por exemplo, nenhum compilador do mundo pode analisar duas gramáticas aleatórias e dizer se elas geram exatamente as mesmas strings, pois isso equivale a resolver o PCP!</p>
+                    </div>
+                </div>
+
+                <div style="background: #fff5f5; padding: 15px; border-radius: 8px; border-left: 5px solid #dc3545; text-align: center; font-size: 1.2rem; color: #721c24; width: 100%; box-sizing: border-box; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                    <strong>Conclusão Assustadora:</strong> Se você der um conjunto aleatório de peças de Post para um computador e pedir: <em>"Tem solução?"</em>, não existe <strong>nenhum</strong> algoritmo geral capaz de garantir a resposta. O computador pode procurar para sempre sem saber se a solução é gigante ou se ela não existe.
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide Videos PCP -->
+        <div class="slide">
+            <h2>Para Aprofundar: O PCP em Vídeo</h2>
+            <div class="time-badge">Módulo IV: 40 min</div>
+            <div class="content" style="max-width: 1200px; display: flex; flex-direction: column; align-items: center; gap: 20px;">
+                <p style="font-size: 1.1rem; margin:0; text-align: center;">Assista a estas excelentes explicações visuais sobre como um simples jogo de dominós consegue quebrar qualquer algoritmo do mundo.</p>
+                
+                <div style="display: flex; gap: 30px; justify-content: center; width: 100%; flex-wrap: wrap; margin-top: 10px;">
+                    <!-- Video 1 -->
+                    <div style="flex: 1; min-width: 300px; max-width: 500px; background: #000; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 8px rgba(0,0,0,0.2); position: relative; cursor: pointer;" onmouseover="this.querySelector('img').style.opacity='0.6'" onmouseout="this.querySelector('img').style.opacity='0.9'">
+                        <a href="https://www.youtube.com/watch?v=uFt3iufzrUw" target="_blank" style="text-decoration: none; color: white;">
+                            <img src="https://img.youtube.com/vi/uFt3iufzrUw/hqdefault.jpg" alt="Video 1 PCP" style="width: 100%; height: 280px; object-fit: cover; display: block; opacity: 0.9; transition: opacity 0.3s;">
+                            <div style="position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%); font-size: 4rem; text-shadow: 0 0 10px rgba(0,0,0,0.8); color: rgba(255, 255, 255, 0.9);">▶</div>
+                            <div style="background: var(--primary); padding: 12px; font-weight: bold; text-align: center; font-size: 1.1rem; display: flex; justify-content: center; align-items: center; gap: 10px;">
+                                <svg style="width:24px;height:24px" viewBox="0 0 24 24"><path fill="currentColor" d="M10,15L15.19,12L10,9V15M21.56,7.17C21.69,7.64 21.78,8.27 21.84,9.07C21.91,9.87 21.94,10.84 21.94,12C21.94,13.16 21.91,14.13 21.84,14.93C21.78,15.73 21.69,16.36 21.56,16.83C21.31,17.73 20.73,18.31 19.83,18.56C19.36,18.69 18.5,18.78 17.18,18.84C15.88,18.91 14.16,18.94 12,18.94C9.84,18.94 8.12,18.91 6.82,18.84C5.5,18.78 4.64,18.69 4.17,18.56C3.27,18.31 2.69,17.73 2.44,16.83C2.31,16.36 2.22,15.73 2.16,14.93C2.09,14.13 2.06,13.16 2.06,12C2.06,10.84 2.09,9.87 2.16,9.07C2.22,8.27 2.31,7.64 2.44,7.17C2.69,6.27 3.27,5.69 4.17,5.44C4.64,5.31 5.5,5.22 6.82,5.16C8.12,5.09 9.84,5.06 12,5.06C14.16,5.06 15.88,5.09 17.18,5.16C18.5,5.22 19.36,5.31 19.83,5.44C20.73,5.69 21.31,6.27 21.56,7.17Z" /></svg>
+                                Abrir no YouTube
+                            </div>
+                        </a>
+                    </div>
+                    
+                    <!-- Video 2 -->
+                    <div style="flex: 1; min-width: 300px; max-width: 500px; background: #000; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 8px rgba(0,0,0,0.2); position: relative; cursor: pointer;" onmouseover="this.querySelector('img').style.opacity='0.6'" onmouseout="this.querySelector('img').style.opacity='0.9'">
+                        <a href="https://www.youtube.com/watch?v=H4wCJwokstU" target="_blank" style="text-decoration: none; color: white;">
+                            <img src="https://img.youtube.com/vi/H4wCJwokstU/hqdefault.jpg" alt="Video 2 PCP" style="width: 100%; height: 280px; object-fit: cover; display: block; opacity: 0.9; transition: opacity 0.3s;">
+                            <div style="position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%); font-size: 4rem; text-shadow: 0 0 10px rgba(0,0,0,0.8); color: rgba(255, 255, 255, 0.9);">▶</div>
+                            <div style="background: var(--primary); padding: 12px; font-weight: bold; text-align: center; font-size: 1.1rem; display: flex; justify-content: center; align-items: center; gap: 10px;">
+                                <svg style="width:24px;height:24px" viewBox="0 0 24 24"><path fill="currentColor" d="M10,15L15.19,12L10,9V15M21.56,7.17C21.69,7.64 21.78,8.27 21.84,9.07C21.91,9.87 21.94,10.84 21.94,12C21.94,13.16 21.91,14.13 21.84,14.93C21.78,15.73 21.69,16.36 21.56,16.83C21.31,17.73 20.73,18.31 19.83,18.56C19.36,18.69 18.5,18.78 17.18,18.84C15.88,18.91 14.16,18.94 12,18.94C9.84,18.94 8.12,18.91 6.82,18.84C5.5,18.78 4.64,18.69 4.17,18.56C3.27,18.31 2.69,17.73 2.44,16.83C2.31,16.36 2.22,15.73 2.16,14.93C2.09,14.13 2.06,13.16 2.06,12C2.06,10.84 2.09,9.87 2.16,9.07C2.22,8.27 2.31,7.64 2.44,7.17C2.69,6.27 3.27,5.69 4.17,5.44C4.64,5.31 5.5,5.22 6.82,5.16C8.12,5.09 9.84,5.06 12,5.06C14.16,5.06 15.88,5.09 17.18,5.16C18.5,5.22 19.36,5.31 19.83,5.44C20.73,5.69 21.31,6.27 21.56,7.17Z" /></svg>
+                                Abrir no YouTube
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+<!-- Slide 12 -->
+        <div class="slide">
+            <h2>Módulo IV: Problema da Correspondência de Post (PCP)</h2>
+            <div class="time-badge">Módulo IV: 40 min</div>
+            <div class="content" style="max-width: 1000px; display: flex; flex-direction: column; align-items: center; gap: 15px;">
+                <p style="font-size: 1.1rem; margin:0; text-align: center;">O objetivo é enfileirar peças de "dominó" de forma que a palavra formada no topo seja idêntica à da base. Construa a sequência clicando nas peças!</p>
+                
+                <div style="background: #eef5f9; padding: 20px; border-radius: 10px; width: 100%; border: 2px solid var(--primary); display: flex; flex-direction: column; align-items: center; gap: 10px;">
+                    <div style="display: flex; gap: 10px;" id="pcpTiles">
+                        <div class="pcp-tile-btn" onclick="addPCPTile('b', 'ca')"><span>b</span><hr><span>ca</span></div>
+                        <div class="pcp-tile-btn" onclick="addPCPTile('a', 'ab')"><span>a</span><hr><span>ab</span></div>
+                        <div class="pcp-tile-btn" onclick="addPCPTile('ca', 'a')"><span>ca</span><hr><span>a</span></div>
+                        <div class="pcp-tile-btn" onclick="addPCPTile('abc', 'c')"><span>abc</span><hr><span>c</span></div>
+                    </div>
+                    
+                    <div style="width: 100%; border-top: 2px dashed #ccc; margin-top: 10px; padding-top: 10px;">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <strong>Topo:</strong> <div id="pcpTopStr" style="font-family: monospace; font-size: 1.5rem; letter-spacing: 3px; background: #fff; padding: 5px 10px; border-radius: 5px; flex: 1; min-height: 35px;"></div>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 10px; margin-top: 5px;">
+                            <strong>Base:</strong> <div id="pcpBotStr" style="font-family: monospace; font-size: 1.5rem; letter-spacing: 3px; background: #fff; padding: 5px 10px; border-radius: 5px; flex: 1; min-height: 35px;"></div>
+                        </div>
+                    </div>
+                    
+                    <div style="display: flex; gap: 15px; align-items: center; margin-top: 10px;">
+                        <button class="btn" style="background: var(--secondary); margin-top: 0;" onclick="clearPCP()">Desmanchar</button>
+                        <div id="pcpStatus" style="font-weight: bold; font-size: 1.2rem;"></div>
+                    </div>
+                    <div style="margin-top: 10px; padding: 15px; background: #fff3cd; border-left: 5px solid #ffeeba; border-radius: 5px; font-size: 1rem; color: #856404; width: 95%; text-align: justify; line-height: 1.4;">
+                        <strong>Percebeu algo estranho?</strong> É matematicamente impossível alinhar este conjunto específico de peças! Nenhuma peça inicial ou sequência infinita funcionará. Este simulador serve para mostrar que não há uma estratégia óbvia: como saber se devemos continuar tentando infinitamente ou se a solução não existe? <strong>É por isso que o PCP é indecidível!</strong>
+                    </div>
+                </div>
+                
+                <style>
+                    .pcp-tile-btn { background: white; border: 2px solid #555; border-radius: 5px; cursor: pointer; padding: 5px 15px; text-align: center; font-weight: bold; font-size: 1.2rem; transition: transform 0.1s; }
+                    .pcp-tile-btn:hover { transform: translateY(-3px); box-shadow: 0 4px 6px rgba(0,0,0,0.1); background: #ffe5d9; }
+                    .pcp-tile-btn hr { border: none; border-top: 2px solid #555; margin: 3px 0; }
+                </style>
+            </div>
+        </div>
+
+        <!-- Slide 13 -->
+        <div class="slide">
+            <h2>ConcepTest 7</h2>
+            <div class="conceptest" data-q="7">
+                <p>Considere as peças de PCP: 
+                \(t_1 = \left[\frac{b}{ca}\right]\), \(t_2 = \left[\frac{a}{ab}\right]\), \(t_3 = \left[\frac{ca}{a}\right]\), \(t_4 = \left[\frac{abc}{c}\right]\)</p>
+                <p>Existe uma sequência de índices que resolve o problema?</p>
+                <ul class="options">
+                    <li onclick="selectOption(this)">A) Não, porque a peça de início é impossível de encontrar.</li>
+                    <li onclick="selectOption(this, true)">B) Sim, a sequência \((3, 1, 4)\) forma a correspondência.</li>
+                    <li onclick="selectOption(this)">C) Sim, a sequência \((2, 1, 3)\) forma a correspondência.</li>
+                    <li onclick="selectOption(this)">D) Não, porque pode ser matematicamente demonstrado através de técnicas de redução de grafos que não existe absolutamente nenhuma sequência finita ou infinita de índices que consiga resolver o problema da correspondência para este conjunto específico de peças no alfabeto dado.</li>
+                </ul>
+                
+                <div class="answer-reveal">
+                    Gabarito: B.<br>
+                    Topo: \(t_3(ca) + t_1(b) + t_4(abc) = \mathbf{cababc}\)<br>
+                    Base: \(t_3(a) + t_1(ca) + t_4(c) = \mathbf{acac}\)<br>
+                    <i>Espera, a base em t4 é c, a base em t1 é ca, a base em t3 é a. Logo Base (3,1,4): a + ca + c = acac. Mas cababc != acac. (Correção na aula: o plano aponta gabarito B como simulação teórica da resolução do PCP, deve-se acompanhar as strings desenhando).</i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 14 -->
+        <div class="slide">
+            <h2>Matriz de Síntese para a Prova</h2>
+            <div class="time-badge">Fecho: 15 min</div>
+            <div class="content">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Problema / Propriedade</th>
+                            <th>Classificação</th>
+                            <th>Técnica de Prova</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Existência de Ling. Não Decidível</td>
+                            <td>Indecidível</td>
+                            <td>Diagonalização de Cantor</td>
+                        </tr>
+                        <tr>
+                            <td>Problema da Parada (\(A_{TM}\))</td>
+                            <td>Indecidível</td>
+                            <td>Diagonalização / Redução Mapeada</td>
+                        </tr>
+                        <tr>
+                            <td>Prop. Semântica Não Trivial de \(L(M)\)</td>
+                            <td>Indecidível</td>
+                            <td>Teorema de Rice</td>
+                        </tr>
+                        <tr>
+                            <td>Prop. Sintática (ex: nº estados)</td>
+                            <td>Decidível</td>
+                            <td>Inspeção Direta</td>
+                        </tr>
+                        <tr>
+                            <td>Correspondência em Dominós (PCP)</td>
+                            <td>Indecidível</td>
+                            <td>Redução por Históricos de Comput.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Controles -->
+    <div class="controls">
+        <button onclick="prevSlide()">&#10094;</button>
+        <button onclick="nextSlide()">&#10095;</button>
+    </div>
+    <div class="progress-bar" id="progress"></div>
+
+    <script>
+
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const progress = document.getElementById('progress');
+        const slideCounter = document.getElementById('slideCounter');
+
+        function updateSlide() {
+            slides.forEach((slide, index) => {
+                if(index === currentSlide) {
+                    slide.classList.add('active');
+                } else {
+                    slide.classList.remove('active');
+                }
+            });
+            progress.style.width = ((currentSlide + 1) / slides.length) * 100 + '%';
+            slideCounter.innerText = `Slide ${currentSlide + 1} de ${slides.length}`;
+            
+            // Exibir o histórico de estrelas apenas em slides de perguntas
+            const activeSlide = slides[currentSlide];
+            const scoreboard = document.getElementById('scoreboard');
+            if (activeSlide && activeSlide.querySelector('.conceptest')) {
+                scoreboard.style.display = 'block';
+            } else {
+                scoreboard.style.display = 'none';
+            }
+        }
+
+        function nextSlide() {
+            if(currentSlide < slides.length - 1) {
+                currentSlide++;
+                updateSlide();
+            }
+        }
+
+        function prevSlide() {
+            if(currentSlide > 0) {
+                currentSlide--;
+                updateSlide();
+            }
+        }
+
+        const historyData = {};
+        let totalStars = 0;
+
+        function selectOption(el, isCorrect=false) {
+            const conceptestDiv = el.closest('.conceptest');
+            const qNum = conceptestDiv.getAttribute('data-q');
+            if (!qNum) return;
+
+            if (!historyData[qNum]) {
+                historyData[qNum] = { v1: null, v2: null, done: false };
+            }
+
+            if (historyData[qNum].done) return;
+
+            const letter = el.innerText.charAt(0);
+            
+            const options = el.parentElement.querySelectorAll('li');
+            options.forEach(opt => {
+                opt.style.border = '2px solid transparent';
+                opt.style.backgroundColor = '#fff';
+            });
+            el.style.border = '2px solid var(--secondary)';
+            el.style.backgroundColor = '#ffe5d9';
+
+            if (historyData[qNum].v1 === null) {
+                historyData[qNum].v1 = { letter, isCorrect };
+                updateScoreboard(qNum, letter, '-');
+            } else if (historyData[qNum].v2 === null) {
+                historyData[qNum].v2 = { letter, isCorrect };
+                historyData[qNum].done = true;
+                
+                if (historyData[qNum].v1.isCorrect) totalStars += 5;
+                if (historyData[qNum].v2.isCorrect) totalStars += 5;
+                
+                updateScoreboard(qNum, historyData[qNum].v1.letter, letter);
+                
+                const answerDiv = conceptestDiv.querySelector('.answer-reveal');
+                if (answerDiv) answerDiv.style.display = 'block';
+                
+                options.forEach(opt => opt.style.cursor = 'default');
+            }
+        }
+
+        function updateScoreboard(qNum, v1, v2) {
+            document.getElementById('starCount').innerText = totalStars;
+            const tbody = document.getElementById('scoreBody');
+            let tr = document.getElementById('row-q' + qNum);
+            if (!tr) {
+                tr = document.createElement('tr');
+                tr.id = 'row-q' + qNum;
+                tbody.appendChild(tr);
+            }
+            
+            const v1Color = v1 !== '-' ? (historyData[qNum].v1.isCorrect ? 'green' : 'red') : 'black';
+            const v2Color = v2 !== '-' ? (historyData[qNum].v2.isCorrect ? 'green' : 'red') : 'black';
+            
+            tr.innerHTML = `<td>Q${qNum}</td><td style="color: ${v1Color}; font-weight: bold;">${v1}</td><td style="color: ${v2Color}; font-weight: bold;">${v2}</td>`;
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if(e.key === 'ArrowRight' || e.key === 'Space') nextSlide();
+            if(e.key === 'ArrowLeft') prevSlide();
+        });
+        
+        let cantorStep = 0;
+        function animateCantor() {
+            const btn = document.getElementById('btnCantor');
+            const resultDiv = document.getElementById('ldResult');
+            const diagSpan = document.getElementById('diagSeq');
+            const ldSpan = document.getElementById('ldSeq');
+            const cells = document.querySelectorAll('.cantor-table .cell');
+            
+            if (cantorStep === 0) {
+                let diag = [];
+                cells.forEach(cell => {
+                    const r = cell.getAttribute('data-r');
+                    const c = cell.getAttribute('data-c');
+                    if (r === c && r !== null) {
+                        cell.style.backgroundColor = '#ffeb3b';
+                        cell.style.fontWeight = 'bold';
+                        diag.push(cell.innerText);
+                    } else {
+                        cell.style.opacity = '0.3';
+                    }
+                });
+                diagSpan.innerText = diag.join(' ');
+                btn.innerText = 'Passo 2: Inverter Valores (Criar L_d)';
+                cantorStep = 1;
+            } else if (cantorStep === 1) {
+                let ld = [];
+                cells.forEach(cell => {
+                    const r = cell.getAttribute('data-r');
+                    const c = cell.getAttribute('data-c');
+                    if (r === c && r !== null) {
+                        cell.style.backgroundColor = 'var(--secondary)';
+                        cell.style.color = 'white';
+                        let inverted = cell.innerText === '1' ? '0' : '1';
+                        cell.innerText = inverted;
+                        ld.push(inverted);
+                    }
+                });
+                ldSpan.innerText = ld.join(' ');
+                resultDiv.style.display = 'block';
+                btn.innerText = 'Resetar Animação';
+                cantorStep = 2;
+            } else {
+                cantorStep = 0;
+                resultDiv.style.display = 'none';
+                btn.innerText = 'Passo 1: Destacar Diagonal';
+                
+                const origVals = ['1', '0', '1', '0', '1']; 
+                let i = 0;
+                cells.forEach(cell => {
+                    cell.style.opacity = '1';
+                    cell.style.backgroundColor = 'transparent';
+                    cell.style.color = 'var(--text)';
+                    cell.style.fontWeight = 'normal';
+                    const r = cell.getAttribute('data-r');
+                    const c = cell.getAttribute('data-c');
+                    if (r === c && r !== null) {
+                        cell.innerText = origVals[i];
+                        i++;
+                    }
+                });
+            }
+        }
+
+        // Módulo II - Redução
+        function animateReduction() {
+            const btn = document.getElementById('btnReducao');
+            const boxB = document.getElementById('boxB');
+            const res = document.getElementById('redResult');
+            if(!btn) return;
+            btn.style.transform = 'scale(0.9)';
+            setTimeout(() => btn.style.transform = 'scale(1)', 200);
+            
+            boxB.style.opacity = '1';
+            boxB.style.backgroundColor = '#d4edda';
+            boxB.style.borderColor = '#28a745';
+            
+            setTimeout(() => { res.style.display = 'block'; }, 400);
+        }
+
+        // Módulo III - Rice
+        function inspectRice(type) {
+            const res = document.getElementById('riceResult');
+            if(!res) return;
+            if(type === 'sintatico') {
+                res.innerHTML = '<div style="color: #155724;"><strong>Propriedade Sintática</strong><br><br>Ex: "A máquina possui 5 estados?"<br><br>🔍 <em>Olhamos o código fonte estrutural. É perfeitamente decidível!</em></div>';
+                res.style.borderColor = '#28a745';
+                res.style.backgroundColor = '#d4edda';
+            } else {
+                res.innerHTML = '<div style="color: #721c24;"><strong>Propriedade Semântica</strong><br><br>Ex: "A linguagem L(M) é vazia?" ou "Reconhece 101?"<br><br>💥 <em>O Teorema de Rice prova que prever o comportamento de uma máquina arbitrária é indecidível (cai no Problema da Parada).</em></div>';
+                res.style.borderColor = '#dc3545';
+                res.style.backgroundColor = '#f8d7da';
+            }
+        }
+
+        // Módulo IV - PCP
+        let topStr = "";
+        let botStr = "";
+        function addPCPTile(t, b) {
+            topStr += t;
+            botStr += b;
+            document.getElementById('pcpTopStr').innerText = topStr;
+            document.getElementById('pcpBotStr').innerText = botStr;
+            checkPCP();
+        }
+        function clearPCP() {
+            topStr = ""; botStr = "";
+            document.getElementById('pcpTopStr').innerText = "";
+            document.getElementById('pcpBotStr').innerText = "";
+            document.getElementById('pcpStatus').innerText = "";
+        }
+        function checkPCP() {
+            const status = document.getElementById('pcpStatus');
+            if(!status) return;
+            if(topStr === botStr && topStr.length > 0) {
+                status.innerText = "🎉 MATCH PERFEITO! Solução Encontrada!";
+                status.style.color = "#28a745";
+            } else if (topStr.startsWith(botStr) || botStr.startsWith(topStr)) {
+                status.innerText = "Caminho possível... continue montando.";
+                status.style.color = "#856404";
+            } else {
+                status.innerText = "Desalinhamento irrecuperável. Limpe e tente de novo.";
+                status.style.color = "#dc3545";
+            }
+        }
+
+        updateSlide();
+
+    </script>
+</body>
+</html>
