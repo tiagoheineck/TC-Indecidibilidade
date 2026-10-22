@@ -149,21 +149,31 @@ O Argumento de Diagonalização de Cantor é uma prova contraintuitiva de que ex
 
 ##### **00:45 – 01:25 | Módulo IV: Problema da Correspondência de Post (PCP)**
 * **Exposição Curta (10 min):**
-  * Formulação do PCP como um quebra-cabeça de peças de dominó $\left[\frac{topo}{base}\right]$.
-  * Importância teórica: Prova de indecidibilidade em problemas de Gramáticas Livres de Contexto (GLCs).
+  * Formulação do PCP como um quebra-cabeça de dominós $\left[\frac{topo}{base}\right]$.
+  * **O Teorema de Post e Caminhos Possíveis:** $L \text{ é decidível} \iff L \in \mathcal{RE} \land \overline{L} \in \mathcal{RE}$.
+    - A busca em largura (BFS) avança por *caminhos possíveis* (onde uma cadeia é prefixo da outra). Se há solução finita, ela é encontrada $\implies PCP \in \mathcal{RE}$ (semi-decidível).
+    - Se não há solução, caminhos infinitos podem continuar se ramificando sem nunca fechar $\implies \overline{PCP} \notin \mathcal{RE}$. Pelo Teorema de Post, o PCP é indecidível.
+  * Importância teórica: Prova de indecidibilidade em problemas de Gramáticas Livres de Contexto (GLCs) via $A_{TM} \le_m PCP$.
+  * **Provocação Pós-Simulador:** *"Tá bom, você é um cara muito inteligente e achou uma resposta..."* Desmistificar a ilusão do sucesso local: achar uma solução em uma instância particular não significa que o problema geral seja decidível. Se um conjunto não tiver solução, um programa testará infinitas combinações em um loop eterno sem conseguir provar a não existência — comportando-se exatamente como o Problema da Parada.
 * **ConcepTest 7 / Atividade em Duplas (30 min):**
-  * *Pergunta:* Considere a seguinte coleção de peças de dominó do PCP:
-    $$t_1 = \left[\frac{b}{ca}\right], \quad t_2 = \left[\frac{a}{ab}\right], \quad t_3 = \left[\frac{ca}{a}\right], \quad t_4 = \left[\frac{abc}{c}\right]$$
-    Existe uma sequência de peças (com repetição) que faz com que a palavra do topo seja exatamente igual à palavra da base?
-    * A) Não, porque a peça de início é impossível de encontrar.
-    * B) Sim, a sequência de índices $(3, 1, 4)$ forma a correspondência.
-    * C) Sim, a sequência $(2, 1, 3)$ forma a correspondência.
-    * D) Não, é demonstrável que para este alfabeto não há solução.
+  * *Pergunta:* Considere as peças de Post: $t_1 = \left[\frac{b}{ca}\right]$, $t_2 = \left[\frac{a}{ab}\right]$, $t_3 = \left[\frac{ca}{a}\right]$, $t_4 = \left[\frac{abc}{c}\right]$. Ao testar a sequência $(2, 1, 3)$, obtemos Topo = $abca$ e Base = $abcaa$ (um caminho possível com prefixo compatível). Com base no **Teorema de Post** e nas propriedades do PCP, o que podemos afirmar?
+    * A) A sequência $(2, 1, 3)$ já encerra a busca, pois no PCP basta que uma das cadeias seja prefixo da outra para configurar decisão.
+    * B) A sequência $(2, 1, 3)$ é apenas uma correspondência parcial; a solução exata exige a extensão $(2, 1, 3, 2, 4)$ que gera "abcaaabc" em ambos. Pelo Teorema de Post, a busca por caminhos possíveis torna o PCP reconhecível, mas a existência de caminhos infinitos sem solução torna $\overline{PCP}$ não reconhecível (indecidível).
+    * C) Como a base tem um caractere excedente em $(2, 1, 3)$, este caminho sofreu desalinhamento irrecuperável e nenhuma extensão finita poderá jamais fechar uma solução.
+    * D) Pelo Teorema de Post, demonstrar que uma instância de dominós possui ao menos um caminho possível é condição matemática suficiente para provar que o complemento do problema é decidível por autômatos finitos determinísticos com fita bidirecional em tempo polinomial.
   * *Gabarito:* **B**
-  * *Demonstração:*  
-    Topo: $t_3(ca) + t_1(b) + t_4(abc) = \mathbf{cababc}$  
-    Base: $t_3(a) + t_1(ca) + t_4(c) = \mathbf{acac}$  
-    *(Nota de condução: Durante a discussão, oriente os alunos a montarem graficamente a correspondência de caracteres no papel).*
+  * *Demonstração Rigorosa:*  
+    No PCP, a condição de solução é a igualdade estrita: $\text{Topo} = \text{Base}$.  
+    - A sequência parcial $(2, 1, 3)$ é um *caminho possível* ($abca \sqsubset abcaa$), mas não encerra a instância.  
+    - A extensão $(2, 1, 3, 2, 4)$ atinge a igualdade:
+      Topo: $t_2(a) + t_1(b) + t_3(ca) + t_2(a) + t_4(abc) = \mathbf{abcaaabc}$  
+      Base: $t_2(ab) + t_1(ca) + t_3(a) + t_2(ab) + t_4(c) = \mathbf{abcaaabc}$  
+      Ambas as palavras são idênticas ($\mathbf{abcaaabc}$, 8 caracteres).  
+    - **Aplicação do Teorema de Post:** Como o algoritmo pode encontrar qualquer correspondência válida por BFS, o PCP é Turing-reconhecível. Contudo, na ausência de solução, caminhos possíveis podem crescer indefinidamente em loop infinito, impedindo o reconhecimento de $\overline{PCP}$. Pelo Teorema de Post, o PCP é indecidível.
+    *(Nota de condução: Esclareça aos alunos a diferença entre um caminho viável na árvore de busca e um match completo).*
+* **Laboratório Interativo 2: Simulação de Instância Indecidível (Loop Infinito):**
+  * Teste interativo com o conjunto $\{[ab/a], [a/bac], [cab/a]\}$, que não possui correspondência finita.
+  * Demonstração ao vivo da busca automática: o computador avança determinística e infinitamente ($t_1 \to t_2 \to t_3 \to t_2 \dots$) sem nunca igualar os comprimentos (diferem sempre em 1 caractere), evidenciando o loop eterno da não parada no PCP.
 
 ##### **01:25 – 01:40 | Fecho e Matriz de Síntese para a Prova de 29/10**
 Projeção e discussão da tabela resumo no quadro:

@@ -843,6 +843,56 @@
             </div>
         </div>
 
+        <!-- Slide Teorema de Post e Caminhos Possiveis -->
+        <div class="slide">
+            <h2>O Teorema de Post e a Indecidibilidade do PCP</h2>
+            <div class="time-badge">Módulo IV: Fundamentação</div>
+            <div class="content" style="max-width: 1050px; display: flex; flex-direction: column; align-items: center; gap: 15px;">
+                
+                <div style="background: #eef5f9; padding: 15px 25px; border-left: 6px solid var(--primary); border-radius: 6px; width: 100%; box-sizing: border-box; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+                    <h3 style="color: var(--primary); margin: 0 0 10px 0;">O Teorema Fundamental de Emil Post</h3>
+                    <p style="font-size: 1.15rem; margin: 0; line-height: 1.5;">
+                        Uma linguagem \(L\) é <strong>Decidível</strong> se, e somente se, ela é tanto <strong>Turing-Reconhecível</strong> (\(\mathcal{RE}\)) quanto <strong>co-Turing-Reconhecível</strong> (\(\text{co-}\mathcal{RE}\)):
+                    </p>
+                    <div style="text-align: center; font-size: 1.4rem; font-weight: bold; color: var(--primary); margin: 10px 0;">
+                        \[ L \in \text{Decidível} \iff (L \in \mathcal{RE}) \;\land\; (\overline{L} \in \mathcal{RE}) \]
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 15px; width: 100%;">
+                    <div style="flex: 1; background: #fff; padding: 20px; border-radius: 8px; border: 2px solid #28a745; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+                        <h4 style="color: #28a745; margin-top: 0; font-size: 1.2rem;">1. "Caminho Possível" e Reconhecibilidade</h4>
+                        <p style="font-size: 1.05rem; text-align: justify; line-height: 1.5; margin-bottom: 8px;">
+                            Dizemos que uma sequência de dominós é um <strong>caminho possível</strong> se uma das cadeias for prefixo da outra (compatibilidade parcial de caracteres).
+                        </p>
+                        <p style="font-size: 1.05rem; text-align: justify; line-height: 1.5; margin: 0;">
+                            Um computador pode realizar uma <strong>busca em largura (BFS)</strong> explorando todos os caminhos possíveis. Se a instância possuir solução finita, <em>ela garantidamente será encontrada</em>. Logo:
+                        </p>
+                        <div style="background: #d4edda; padding: 8px; border-radius: 5px; text-align: center; font-weight: bold; color: #155724; margin-top: 8px;">
+                            O PCP é Turing-Reconhecível (Semi-decidível)!
+                        </div>
+                    </div>
+
+                    <div style="flex: 1; background: #fff; padding: 20px; border-radius: 8px; border: 2px solid #dc3545; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
+                        <h4 style="color: #dc3545; margin-top: 0; font-size: 1.2rem;">2. A Armadilha dos Caminhos Infinitos</h4>
+                        <p style="font-size: 1.05rem; text-align: justify; line-height: 1.5; margin-bottom: 8px;">
+                            E se a instância <strong>não tiver solução</strong>? A árvore de busca pode conter ramificações infinitas de "caminhos possíveis" que crescem indefinidamente sem nunca fechar a igualdade exata.
+                        </p>
+                        <p style="font-size: 1.05rem; text-align: justify; line-height: 1.5; margin: 0;">
+                            O algoritmo fica preso em <strong>loop infinito</strong>, incapaz de certificar se a solução não existe ou se é apenas gigantesca. Logo:
+                        </p>
+                        <div style="background: #f8d7da; padding: 8px; border-radius: 5px; text-align: center; font-weight: bold; color: #721c24; margin-top: 8px;">
+                            O Complemento (\(\overline{PCP}\)) NÃO é Reconhecível!
+                        </div>
+                    </div>
+                </div>
+
+                <div style="background: #fff3cd; padding: 12px 20px; border-radius: 6px; border-left: 5px solid #ffc107; font-size: 1.1rem; color: #856404; width: 100%; box-sizing: border-box; text-align: justify; line-height: 1.5;">
+                    <strong>Veredito do Teorema de Post:</strong> Como o PCP falha em ser co-reconhecível, ele não satisfaz as duas pontas da equivalência do Teorema de Post. Portanto, <strong>o PCP é categoricamente INDECIDÍVEL</strong>.
+                </div>
+            </div>
+        </div>
+
 <!-- Slide 12 -->
         <div class="slide">
             <h2>Módulo IV: Problema da Correspondência de Post (PCP)</h2>
@@ -907,7 +957,87 @@
             </div>
         </div>
 
-        <!-- Slide 14 -->
+                <!-- Slide Provocacao PCP / Teorema de Post -->
+        <div class="slide">
+            <h2>A Ilusão do Sucesso Local</h2>
+            <div class="time-badge">Módulo IV: O X da Questão</div>
+            <div class="content" style="max-width: 1050px; display: flex; flex-direction: column; align-items: center; gap: 20px;">
+                
+                <div style="background: linear-gradient(135deg, #1d3557, #457b9d); color: white; padding: 25px 35px; border-radius: 12px; text-align: center; box-shadow: 0 6px 15px rgba(0,0,0,0.15); width: 100%; box-sizing: border-box;">
+                    <span style="font-size: 2.2rem; font-weight: bold; letter-spacing: 0.5px; display: block; margin-bottom: 5px;">
+                        "Tá bom, você é um cara muito inteligente e achou uma resposta."
+                    </span>
+                    <span style="font-size: 1.2rem; opacity: 0.9; font-style: italic;">
+                        Mas o que a Teoria da Computação realmente nos ensina sobre isso?
+                    </span>
+                </div>
+
+                <div style="background: #fff; padding: 25px 30px; border-radius: 10px; border-left: 8px solid var(--secondary); box-shadow: 0 4px 10px rgba(0,0,0,0.08); width: 100%; box-sizing: border-box; text-align: justify; font-size: 1.25rem; line-height: 1.7; color: var(--text);">
+                    Mas o <strong>Teorema de Post</strong> não diz que é impossível; ele diz que se você criar um programa para tentar resolver isso, ele pode encontrar a resposta rapidamente para alguns conjuntos. No entanto, para outros conjuntos de peças que não têm solução, o seu programa pode ficar testando infinitas combinações em um <strong>loop eterno</strong>, sem nunca conseguir afirmar com certeza que a solução não existe.<br><br>
+                    <div style="background: #fff5f5; border: 2px solid #dc3545; border-radius: 8px; padding: 15px; text-align: center; font-weight: bold; color: #721c24; font-size: 1.3rem;">
+                        💥 Ele é como uma instância reduzida do Problema da Parada!
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 20px; width: 100%;">
+                    <div style="flex: 1; background: #eef5f9; padding: 15px 20px; border-radius: 8px; border-top: 4px solid #28a745; text-align: center;">
+                        <strong style="color: #28a745; font-size: 1.15rem;">Instâncias com Solução (SIM)</strong>
+                        <p style="margin: 8px 0 0 0; font-size: 1.05rem; color: #444;">O programa testa caminhos possíveis, acha o match e <strong>para</strong> em tempo finito (\(PCP \in \mathcal{RE}\)).</p>
+                    </div>
+                    <div style="flex: 1; background: #fff3cd; padding: 15px 20px; border-radius: 8px; border-top: 4px solid #dc3545; text-align: center;">
+                        <strong style="color: #dc3545; font-size: 1.15rem;">Instâncias sem Solução (NÃO)</strong>
+                        <p style="margin: 8px 0 0 0; font-size: 1.05rem; color: #444;">O programa testa combinações eternamente sem nunca saber se a resposta não existe (\(\overline{PCP} \notin \mathcal{RE}\)).</p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Slide PCP Indecidivel Simulation -->
+        <div class="slide">
+            <h2>Simulação: A Armadilha do Loop Infinito (PCP Indecidível)</h2>
+            <div class="time-badge">Módulo IV: O Limite da Computação</div>
+            <div class="content" style="max-width: 1050px; display: flex; flex-direction: column; align-items: center; gap: 15px;">
+                <p style="font-size: 1.1rem; margin:0; text-align: center;">Agora teste uma instância que <strong>NÃO possui solução</strong>. Veja como o algoritmo é enganado por caminhos possíveis e cai em um loop infinito!</p>
+                
+                <div style="background: #eef5f9; padding: 20px; border-radius: 10px; width: 100%; border: 2px solid #dc3545; display: flex; flex-direction: column; align-items: center; gap: 10px; box-sizing: border-box;">
+                    <div style="display: flex; gap: 15px;" id="pcp2Tiles">
+                        <div class="pcp-tile-btn" onclick="addPCP2Tile('ab', 'a')"><span>ab</span><hr><span>a</span></div>
+                        <div class="pcp-tile-btn" onclick="addPCP2Tile('a', 'bac')"><span>a</span><hr><span>bac</span></div>
+                        <div class="pcp-tile-btn" onclick="addPCP2Tile('cab', 'a')"><span>cab</span><hr><span>a</span></div>
+                    </div>
+                    
+                    <div style="width: 100%; border-top: 2px dashed #ccc; margin-top: 5px; padding-top: 10px;">
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            <strong>Topo:</strong> <div id="pcp2TopStr" style="font-family: monospace; font-size: 1.25rem; letter-spacing: 2px; background: #fff; padding: 5px 10px; border-radius: 5px; flex: 1; min-height: 32px; word-break: break-all; max-height: 60px; overflow-y: auto;"></div>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 10px; margin-top: 5px;">
+                            <strong>Base:</strong> <div id="pcp2BotStr" style="font-family: monospace; font-size: 1.25rem; letter-spacing: 2px; background: #fff; padding: 5px 10px; border-radius: 5px; flex: 1; min-height: 32px; word-break: break-all; max-height: 60px; overflow-y: auto;"></div>
+                        </div>
+                    </div>
+                    
+                    <div style="display: flex; gap: 12px; align-items: center; margin-top: 5px; flex-wrap: wrap; justify-content: center;">
+                        <button class="btn" style="background: var(--secondary); margin-top: 0; padding: 8px 16px;" onclick="clearPCP2()">Desmanchar</button>
+                        <button class="btn" style="background: #28a745; margin-top: 0; padding: 8px 16px;" onclick="startPCP2Auto()">▶ Simular Busca Automática (BFS)</button>
+                        <button class="btn" style="background: #6c757d; margin-top: 0; padding: 8px 16px;" onclick="stopPCP2Auto()">⏸ Pausar</button>
+                        <span style="font-size: 1rem; color: #555; font-weight: bold;">Peças: <span id="pcp2Count">0</span></span>
+                    </div>
+
+                    <div id="pcp2Status" style="font-weight: bold; font-size: 1.15rem; min-height: 28px; text-align: center; color: #555;">
+                        Aguardando início... Clique nas peças ou ative a busca automática!
+                    </div>
+
+                    <div style="margin-top: 5px; padding: 12px 18px; background: #fff3cd; border-left: 5px solid #ffc107; border-radius: 5px; font-size: 0.95rem; color: #856404; width: 95%; text-align: justify; line-height: 1.4;">
+                        <strong>Por que esta instância é indecidível na prática?</strong><br>
+                        • <strong>A Armadilha:</strong> A sequência é forçada: \(t_1 \to t_2 \to t_3 \to t_2 \to t_3 \to \dots\). A cada peça, uma cadeia é sempre prefixo da outra (o status sempre dá <em>"Caminho viável"</em>!).<br>
+                        • <strong>A Certeza Matemática:</strong> Os comprimentos diferem sempre por 1 letra (sobra <code>'b'</code> no topo ou <code>'c'</code> na base alternadamente). Eles <strong>NUNCA</strong> terão o mesmo tamanho e jamais fecharão uma correspondência!<br>
+                        • <strong>O Veredito da Parada:</strong> Um computador nunca saberia que está preso nesse ciclo. Ele continuará gerando trilhões de dominós para sempre, sem poder responder "NÃO".
+                    </div>
+                </div>
+            </div>
+        </div>
+
+<!-- Slide 14 -->
         <div class="slide">
             <h2>Matriz de Síntese para a Prova</h2>
             <div class="time-badge">Fecho: 15 min</div>
@@ -1020,7 +1150,98 @@
         function nextSlide() {
             if(currentSlide < slides.length - 1) {
                 currentSlide++;
-                updateSlide();
+                
+        // Módulo IV - PCP 2 (Instância Indecidível / Loop Infinito)
+        let topStr2 = "";
+        let botStr2 = "";
+        let pcp2Timer = null;
+        let pcp2Count = 0;
+        let pcp2NextAuto = 1;
+
+        function addPCP2Tile(t, b) {
+            topStr2 += t;
+            botStr2 += b;
+            pcp2Count++;
+            const topEl = document.getElementById('pcp2TopStr');
+            const botEl = document.getElementById('pcp2BotStr');
+            const countEl = document.getElementById('pcp2Count');
+            if(topEl) { topEl.innerText = topStr2; topEl.scrollLeft = topEl.scrollWidth; }
+            if(botEl) { botEl.innerText = botStr2; botEl.scrollLeft = botEl.scrollWidth; }
+            if(countEl) countEl.innerText = pcp2Count;
+            checkPCP2();
+        }
+
+        function clearPCP2() {
+            stopPCP2Auto();
+            topStr2 = ""; botStr2 = ""; pcp2Count = 0; pcp2NextAuto = 1;
+            const topEl = document.getElementById('pcp2TopStr');
+            const botEl = document.getElementById('pcp2BotStr');
+            const countEl = document.getElementById('pcp2Count');
+            const status = document.getElementById('pcp2Status');
+            if(topEl) topEl.innerText = "";
+            if(botEl) botEl.innerText = "";
+            if(countEl) countEl.innerText = "0";
+            if(status) {
+                status.innerText = "Aguardando início... Clique nas peças ou ative a busca automática!";
+                status.style.color = "#555";
+            }
+        }
+
+        function checkPCP2() {
+            const status = document.getElementById('pcp2Status');
+            if(!status) return;
+
+            if(topStr2 === botStr2 && topStr2.length > 0) {
+                status.innerText = "🎉 Solução Encontrada!";
+                status.style.color = "#28a745";
+            } else if (topStr2.startsWith(botStr2)) {
+                const diff = topStr2.slice(botStr2.length);
+                status.innerHTML = `⚠️ <strong>Caminho viável!</strong> Mas o Topo está à frente por <code>"${diff}"</code>. O algoritmo segue buscando...`;
+                status.style.color = "#856404";
+            } else if (botStr2.startsWith(topStr2)) {
+                const diff = botStr2.slice(topStr2.length);
+                status.innerHTML = `⚠️ <strong>Caminho viável!</strong> Mas a Base está à frente por <code>"${diff}"</code>. O algoritmo segue buscando...`;
+                status.style.color = "#856404";
+            } else {
+                status.innerText = "❌ Desalinhamento irrecuperável. Este ramo morreu.";
+                status.style.color = "#dc3545";
+            }
+        }
+
+        function startPCP2Auto() {
+            if(pcp2Timer) return;
+            const status = document.getElementById('pcp2Status');
+            
+            pcp2Timer = setInterval(() => {
+                if(pcp2Count === 0) {
+                    addPCP2Tile('ab', 'a');
+                    pcp2NextAuto = 2;
+                } else if(pcp2NextAuto === 2) {
+                    addPCP2Tile('a', 'bac');
+                    pcp2NextAuto = 3;
+                } else {
+                    addPCP2Tile('cab', 'a');
+                    pcp2NextAuto = 2;
+                }
+
+                if(pcp2Count >= 25) {
+                    stopPCP2Auto();
+                    if(status) {
+                        status.innerHTML = `🔄 <strong>LOOP ETERNO DETECTADO!</strong> (${pcp2Count} peças).<br>O Topo e a Base continuam alternando prefixos sem nunca se igualarem. O computador rodará para sempre!`;
+                        status.style.color = "#dc3545";
+                    }
+                }
+            }, 300);
+        }
+
+        function stopPCP2Auto() {
+            if(pcp2Timer) {
+                clearInterval(pcp2Timer);
+                pcp2Timer = null;
+            }
+        }
+
+        updateSlide();
             }
         }
 
